@@ -1,0 +1,120 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Bugs | BugTracker AI{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ page_title }}</h2>
+    <p>{{ page_subtitle }}</p>
+</div>
+
+<section class="card">
+    <form method="GET" class="form-grid three-col">
+        <div class="field">
+            <label>Search</label>
+            <input class="input" type="text" name="q" value="{{ filters.q }}" placeholder="Title, app, description, fixer, reporter">
+        </div>
+        <div class="field">
+            <label>Status</label>
+            <select class="select" name="status">
+                <option value="">All statuses</option>
+                {% for status in ["Open", "In Progress", "Resolved", "Closed"] %}
+                <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label>Priority</label>
+            <select class="select" name="priority">
+                <option value="">All priorities</option>
+                {% for priority in ["High", "Medium", "Low"] %}
+                <option value="{{ priority }}" {% if filters.priority == priority %}selected{% endif %}>{{ priority }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if role == "admin" %}
+        <div class="field">
+            <label>Fixer</label>
+            <select class="select" name="fixer">
+                <option value="">All fixers</option>
+                {% for fixer in fixers %}
+                <option value="{{ fixer['username'] }}" {% if filters.fixer == fixer['username'] %}selected{% endif %}>{{ fixer["username"] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="form-actions" style="align-items:end;">
+            <button class="btn btn-primary" type="submit">Apply filters</button>
+            <a class="btn btn-ghost" href="{{ url_for('view_bugs') }}">Reset</a>
+        </div>
+    </form>
+</section>
+
+<section class="list-card" style="margin-top:18px;">
+    <div class="table-toolbar">
+        <div>
+            <h3 class="card-title">Bug list</h3>
+            <p class="card-subtitle">{{ bugs|length }} visible reports</p>
+        </div>
+        {% if role == "fixer" %}
+        <div class="queue-chip">Your assigned bug queue with quick status controls</div>
+        {% endif %}
+    </div>
+
+    <div class="table-list">
+        <div class="table-row table-head">
+            <div>ID</div>
+            <div>Bug</div>
+            <div>Owner</div>
+            <div>Priority</div>
+            <div>Status</div>
+            <div>Actions</div>
+        </div>
+
+        {% for bug in bugs %}
+        <div class="table-row bug-row-card">
+            <div><strong>#{{ bug["id"] }}</strong></div>
+            <div>
+                <strong>{{ bug["title"] or "Bug report" }}</strong>
+                <div class="meta-copy">{{ bug["app_name"] or "General" }} - {{ bug["created_at"] }}</div>
+                <div class="desc-copy">{{ bug["description"] }}</div>
+            </div>
+            <div>
+                {% if role == "fixer" %}
+                <strong>{{ display_name(bug["reporter"]) }}</strong>
+                <div class="meta-copy">Reporter</div>
+                <div class="meta-copy">Assigned: {{ display_name(bug["assigned_to"]) }}</div>
+                {% else %}
+                <strong>{{ display_name(bug["assigned_to"]) }}</strong>
+                <div class="meta-copy">Fixer</div>
+                {% endif %}
+            </div>
+            <div><span class="badge badge-{{ bug['priority']|lower }}">{{ bug["priority"] }}</span></div>
+            <div>
+                <span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span>
+                {% if role == "fixer" %}
+                <form method="POST" action="{{ url_for('update_bug_status', id=bug['id']) }}" class="quick-status-form">
+                    <select class="quick-status-select" name="status" onchange="this.form.submit()">
+                        {% for status in ["Open", "In Progress", "Resolved", "Closed"] %}
+                        <option value="{{ status }}" {% if bug["status"] == status %}selected{% endif %}>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="resolution_note" value="{{ bug['resolution_note'] or '' }}">
+                </form>
+                {% endif %}
+            </div>
+            <div class="inline-actions">
+                <a class="btn btn-ghost" href="{{ url_for('bug_detail', id=bug['id']) }}">Open</a>
+                {% if role in ["fixer", "admin"] %}
+                <a class="btn" href="{{ url_for('edit_bug', id=bug['id']) }}">Manage</a>
+                {% endif %}
+                <a class="btn btn-danger" href="{{ url_for('delete_bug', id=bug['id']) }}">Delete</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">No bug reports matched your filters.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

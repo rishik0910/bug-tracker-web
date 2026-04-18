@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics | BugTracker AI{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Analytics</h2>
+    <p>Trend, workload, and status visibility built from your live bug data.</p>
+</div>
+
+<section class="stats-grid">
+    <article class="metric-card"><span>Total bugs</span><strong>{{ metrics.total }}</strong><span>Visible in this role</span></article>
+    <article class="metric-card"><span>Open bugs</span><strong style="color:#dc2626;">{{ metrics.open }}</strong><span>Need attention</span></article>
+    <article class="metric-card"><span>Resolved bugs</span><strong style="color:#16a34a;">{{ metrics.resolved }}</strong><span>Completed flow</span></article>
+    <article class="metric-card"><span>Fixer load</span><strong>{{ metrics.workload|length }}</strong><span>People with assignments</span></article>
+</section>
+
+<section class="card-grid">
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Weekly trend</h3>
+                <p class="card-subtitle">New bugs compared with resolved items</p>
+            </div>
+        </div>
+        <div class="chart-box"><canvas id="analyticsTrendChart"></canvas></div>
+    </article>
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Priority breakdown</h3>
+                <p class="card-subtitle">Current recorded mix</p>
+            </div>
+        </div>
+        <div class="chart-box"><canvas id="priorityChart"></canvas></div>
+    </article>
+</section>
+
+<section class="split-grid" style="grid-template-columns:1fr 1fr;">
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Status distribution</h3>
+                <p class="card-subtitle">Relative volume by workflow state</p>
+            </div>
+        </div>
+        <div class="status-bars">
+            {% for row in status_rows %}
+            <div class="status-row">
+                <div class="stack-row">
+                    <strong>{{ row.label }}</strong>
+                    <span>{{ row.count }}</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill" style="width:{{ row.percent }}%;background:{{ row.color }};"></div></div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Workload snapshot</h3>
+                <p class="card-subtitle">Assigned bugs by fixer</p>
+            </div>
+        </div>
+        <div class="workload-list">
+            {% for item in metrics.workload %}
+            <div class="workload-row">
+                <div class="stack-row">
+                    <strong>{{ display_name(item.name) }}</strong>
+                    <span>{{ item.count }} assigned</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill" style="width:{{ item.percent }}%"></div></div>
+            </div>
+            {% else %}
+            <div class="empty-state">No assignments yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const analyticsData = {{ analytics_chart_data|safe }};
+
+new Chart(document.getElementById("analyticsTrendChart"), {
+    type: "bar",
+    data: {
+        labels: analyticsData.trendLabels,
+        datasets: [
+            { label: "New", data: analyticsData.newBugValues, backgroundColor: "#4f46e5" },
+            { label: "Resolved", data: analyticsData.resolvedValues, backgroundColor: "#16a34a" }
+        ]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+});
+
+new Chart(document.getElementById("priorityChart"), {
+    type: "pie",
+    data: {
+        labels: analyticsData.priorityLabels,
+        datasets: [{ data: analyticsData.priorityValues, backgroundColor: analyticsData.priorityColors, borderWidth: 0 }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+});
+</script>
+{% endblock %}

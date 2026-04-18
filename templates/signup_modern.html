@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | BugTracker AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="auth-shell">
+    <section class="auth-copy">
+        <p class="eyebrow">Team onboarding</p>
+        <h1>Create user, fixer, or admin accounts from one place.</h1>
+        <p>Choose the right role for each teammate so they land in the correct workflow immediately.</p>
+
+        <div class="auth-points">
+            <div class="auth-point"><strong>User</strong><p>Submit and track bug reports.</p></div>
+            <div class="auth-point"><strong>Fixer</strong><p>Resolve assigned issues and post updates.</p></div>
+            <div class="auth-point"><strong>Admin</strong><p>Oversee the complete system and analytics.</p></div>
+        </div>
+    </section>
+
+    <section class="auth-card">
+        <div class="auth-switch">
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}" class="active">Sign Up</a>
+        </div>
+        <div style="margin-top:24px;">
+            <h2>Create account</h2>
+            <p class="meta-copy">Set up access for the workflow you need.</p>
+        </div>
+
+        {% include "_flash.html" %}
+
+        <form method="POST" class="auth-form">
+            <div class="field">
+                <label>Username</label>
+                <input class="input" type="text" name="username" placeholder="Choose username" required>
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input class="input" type="email" name="email" placeholder="name@company.com" required>
+            </div>
+            <div class="field">
+                <label>Role</label>
+                <select class="select" name="role" required>
+                    <option value="user">User</option>
+                    <option value="fixer">Bug Fixer</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input class="input" type="password" name="password" placeholder="Create password" required>
+            </div>
+            <div class="field">
+                <label>Confirm password</label>
+                <input class="input" type="password" name="confirm_password" placeholder="Repeat password" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Create account</button>
+        </form>
+    </section>
+</div>
+</body>
+</html>

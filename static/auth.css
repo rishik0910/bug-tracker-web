@@ -1,0 +1,217 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #e2e8f0;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(34, 197, 94, 0.18), transparent 25%),
+        radial-gradient(circle at 88% 16%, rgba(14, 165, 233, 0.16), transparent 28%),
+        linear-gradient(135deg, #020617 0%, #0f172a 52%, #111827 100%);
+}
+
+.auth-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 0.92fr 560px;
+    gap: 24px;
+    align-items: center;
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 30px 0;
+}
+
+.auth-panel,
+.form-card {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.74));
+    box-shadow: 0 24px 80px rgba(0,0,0,0.32);
+    backdrop-filter: blur(18px);
+}
+
+.auth-panel {
+    padding: 34px;
+    border-radius: 30px;
+    opacity: 0.82;
+    transform: scale(0.96);
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.auth-panel h1 {
+    margin: 20px 0 14px;
+    color: #f8fafc;
+    font-size: clamp(28px, 3.5vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+}
+
+.auth-panel p {
+    color: #cbd5e1;
+    line-height: 1.7;
+    max-width: 520px;
+    font-size: 15px;
+}
+
+.feature-list {
+    margin-top: 22px;
+    display: grid;
+    gap: 12px;
+}
+
+.feature-list div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255,255,255,0.06);
+    font-size: 15px;
+}
+
+.feature-list i {
+    color: #86efac;
+}
+
+.form-card {
+    padding: 34px;
+    border-radius: 28px;
+    border: 1px solid rgba(134, 239, 172, 0.2);
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.88));
+    box-shadow:
+        0 28px 90px rgba(0,0,0,0.42),
+        0 0 0 1px rgba(134, 239, 172, 0.04),
+        0 0 46px rgba(34, 197, 94, 0.12);
+    transform: translateY(-8px) scale(1.03);
+}
+
+.switcher {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 6px;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.56);
+    margin-bottom: 24px;
+}
+
+.switcher a {
+    text-align: center;
+    padding: 12px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.switcher a.active {
+    color: #020617;
+    background: linear-gradient(135deg, #86efac, #22c55e);
+    box-shadow: 0 10px 24px rgba(34, 197, 94, 0.25);
+}
+
+.form-card h2 {
+    color: #f8fafc;
+    font-size: 34px;
+    letter-spacing: -0.03em;
+}
+
+.form-copy {
+    color: #94a3b8;
+    margin: 10px 0 24px;
+    font-size: 16px;
+}
+
+.auth-form {
+    display: grid;
+    gap: 16px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.input-wrap {
+    position: relative;
+}
+
+.input-wrap i {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: #64748b;
+}
+
+.input-wrap input,
+.input-wrap select {
+    width: 100%;
+    padding: 17px 16px 17px 48px;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(15, 23, 42, 0.72);
+    color: #f8fafc;
+    outline: none;
+    transition: 0.25s ease;
+}
+
+.input-wrap input:focus,
+.input-wrap select:focus {
+    border-color: rgba(134, 239, 172, 0.45);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+    background: rgba(15, 23, 42, 0.92);
+}
+
+.auth-form button {
+    margin-top: 4px;
+    padding: 17px 18px;
+    border: none;
+    border-radius: 16px;
+    color: #020617;
+    background: linear-gradient(135deg, #86efac, #22c55e);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 18px 34px rgba(34, 197, 94, 0.22);
+    transition: 0.25s ease;
+}
+
+.auth-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 42px rgba(34, 197, 94, 0.3);
+}
+
+@media (max-width: 960px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-panel,
+    .form-card {
+        transform: none;
+        opacity: 1;
+    }
+}

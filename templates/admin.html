@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel | BugTracker AI{% endblock %}
+{% block page_title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Admin panel</h2>
+    <p>Monitor system health, users, and bug flow from one control center.</p>
+</div>
+
+<section class="stats-grid">
+    <article class="metric-card"><span>Total bugs</span><strong>{{ total_bugs }}</strong><span>Recorded in the system</span></article>
+    <article class="metric-card"><span>Total users</span><strong>{{ total_users }}</strong><span>All accounts</span></article>
+    <article class="metric-card"><span>Total fixers</span><strong>{{ total_fixers }}</strong><span>Assignable team members</span></article>
+    <article class="metric-card"><span>Open bugs</span><strong style="color:#dc2626;">{{ open_bugs }}</strong><span>Still waiting</span></article>
+</section>
+
+<section class="split-grid" style="grid-template-columns:1.15fr 0.85fr;margin-bottom:18px;">
+    <article class="card ai-admin-shell">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">AI control tower</h3>
+                <p class="card-subtitle">Live operational insights for bug triage and workload planning</p>
+            </div>
+        </div>
+        <div class="ai-grid" style="margin-top:16px;">
+            {% for item in ai_insights.cards %}
+            <div class="ai-card">
+                <span class="ai-label">{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+                <div class="meta-copy" style="margin-top:6px;">{{ item.detail }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="ai-block" style="margin-top:16px;">
+            <h4>Recommended actions</h4>
+            <ul class="ai-list">
+                {% for action in ai_insights.actions %}
+                <li>{{ action }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Delivery signals</h3>
+                <p class="card-subtitle">Quick operational checks</p>
+            </div>
+        </div>
+        <div class="status-bars" style="margin-top:16px;">
+            <div class="status-row">
+                <div class="stack-row">
+                    <strong>Email system</strong>
+                    <span>{% if email_configured %}Configured{% else %}Needs setup{% endif %}</span>
+                </div>
+                <div class="meta-copy">Submission and resolution emails {% if email_configured %}are ready to send{% else %}will send once SMTP is configured{% endif %}.</div>
+            </div>
+            {% for bug in ai_insights.oldest_open %}
+            <div class="status-row">
+                <div class="stack-row">
+                    <strong>Oldest open bug</strong>
+                    <span>#{{ bug["id"] }}</span>
+                </div>
+                <div class="meta-copy">{{ bug["title"] or "Bug report" }} - {{ bug["created_at"] }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="split-grid" style="grid-template-columns:0.95fr 1.05fr;margin-bottom:18px;">
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Add fixer account</h3>
+                <p class="card-subtitle">Create a real fixer identity with login access</p>
+            </div>
+        </div>
+        <form method="POST" class="form-grid" style="margin-top:16px;">
+            <div class="field">
+                <label>Fixer name / username</label>
+                <input class="input" type="text" name="username" placeholder="Priya" required>
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input class="input" type="email" name="email" placeholder="priya@company.com" required>
+            </div>
+            <div class="field">
+                <label>Temporary password</label>
+                <input class="input" type="text" name="password" placeholder="Priya@123" required>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Create fixer</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Fixer onboarding</h3>
+                <p class="card-subtitle">How the fixer flow works in this system</p>
+            </div>
+        </div>
+        <div class="status-bars" style="margin-top:16px;">
+            <div class="status-row">
+                <strong>1. Admin creates fixer</strong>
+                <div class="meta-copy">Each fixer gets a real username, email, and password.</div>
+            </div>
+            <div class="status-row">
+                <strong>2. Fixer logs in</strong>
+                <div class="meta-copy">The login page shows real fixer quick-login cards for easier access during demos and testing.</div>
+            </div>
+            <div class="status-row">
+                <strong>3. Fixer updates profile</strong>
+                <div class="meta-copy">Each fixer can open Profile and set a new password after login.</div>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="split-grid" style="grid-template-columns:1.2fr 0.8fr;">
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Recent bugs</h3>
+                <p class="card-subtitle">Latest items across the full workspace</p>
+            </div>
+        </div>
+        <div class="table-list">
+            {% for bug in bugs[:8] %}
+            <div class="table-row">
+                <div><strong>#{{ bug["id"] }}</strong></div>
+                <div>
+                    <strong>{{ bug["title"] }}</strong>
+                    <div class="meta-copy">{{ bug["app_name"] or "General" }}</div>
+                </div>
+                <div><strong>{{ display_name(bug["assigned_to"]) }}</strong><div class="meta-copy">Fixer</div></div>
+                <div><span class="badge badge-{{ bug['priority']|lower }}">{{ bug["priority"] }}</span></div>
+                <div><span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span></div>
+                <div><a class="btn" href="{{ url_for('edit_bug', id=bug['id']) }}">Open</a></div>
+            </div>
+            {% else %}
+            <div class="empty-state">No bugs yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">User directory</h3>
+                <p class="card-subtitle">Account roster and roles</p>
+            </div>
+        </div>
+        <div class="table-list">
+            {% for user in users %}
+            <div class="table-row compact">
+                <div>
+                    <strong>{{ display_name(user["username"]) }}</strong>
+                    <div class="meta-copy">{{ user["email"] or "No email" }}</div>
+                </div>
+                <div><span class="badge badge-{{ user['role']|lower }}">{{ user["role"]|title }}</span></div>
+                <div class="meta-copy">Account active</div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

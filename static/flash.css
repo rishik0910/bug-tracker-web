@@ -1,0 +1,33 @@
+.flash-stack {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.flash {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.18);
+}
+
+.flash-success {
+    color: #dcfce7;
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.flash-info {
+    color: #dbeafe;
+    background: rgba(59, 130, 246, 0.14);
+    border-color: rgba(59, 130, 246, 0.22);
+}
+
+.flash-error {
+    color: #fee2e2;
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.22);
+}

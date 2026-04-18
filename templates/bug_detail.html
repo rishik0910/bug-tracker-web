@@ -1,0 +1,136 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Bug Discussion | BugTracker AI{% endblock %}
+{% block page_title %}Bug Discussion{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ bug["title"] or "Bug report" }}</h2>
+    <p>{{ bug["app_name"] or "General project" }} - {{ bug["created_at"] }} - {{ bug["priority"] }}</p>
+</div>
+
+<section class="detail-layout">
+    <article class="card">
+        <div class="detail-meta">
+            <span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span>
+            <span class="badge badge-{{ bug['priority']|lower }}">{{ bug["priority"] }}</span>
+            <span class="meta-copy">Reporter: {{ display_name(bug["reporter"]) }}</span>
+            <span class="meta-copy">Fixer: {{ display_name(bug["assigned_to"]) }}</span>
+        </div>
+        <p class="desc-copy" style="margin-top:18px;">{{ bug["description"] }}</p>
+
+        {% if bug["resolution_note"] %}
+        <div class="workload-row" style="margin-top:18px;">
+            <strong>Resolution note</strong>
+            <p class="desc-copy">{{ bug["resolution_note"] }}</p>
+        </div>
+        {% endif %}
+
+        {% if bug["screenshot_path"] %}
+        <div style="margin-top:18px;">
+            <a href="{{ url_for('static', filename=bug['screenshot_path']) }}" target="_blank">
+                <img class="screenshot-thumb" src="{{ url_for('static', filename=bug['screenshot_path']) }}" alt="Bug screenshot">
+            </a>
+        </div>
+        {% endif %}
+    </article>
+
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">AI assistant</h3>
+                <p class="card-subtitle">Generate bug triage, severity hints, and fixer guidance</p>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="analyze">
+                <button class="btn btn-primary" type="submit">Analyze Bug</button>
+            </form>
+        </div>
+
+        {% if ai_analysis %}
+        <div class="ai-panel">
+            <div class="ai-grid">
+                <div class="ai-card">
+                    <span class="ai-label">AI severity</span>
+                    <strong>{{ ai_analysis.severity }}</strong>
+                </div>
+                <div class="ai-card">
+                    <span class="ai-label">Model status</span>
+                    <strong>{% if ai_configured %}Ready{% else %}Offline{% endif %}</strong>
+                </div>
+            </div>
+
+            <div class="ai-block">
+                <h4>Summary</h4>
+                <p>{{ ai_analysis.summary }}</p>
+            </div>
+            <div class="ai-block">
+                <h4>Suspected cause</h4>
+                <p>{{ ai_analysis.suspected_cause }}</p>
+            </div>
+            <div class="ai-block">
+                <h4>Debugging steps</h4>
+                <ul class="ai-list">
+                    {% for step in ai_analysis.debugging_steps %}
+                    <li>{{ step }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="ai-block">
+                <h4>Fixer update draft</h4>
+                <p>{{ ai_analysis.fixer_update }}</p>
+            </div>
+            <div class="ai-block">
+                <h4>User reply draft</h4>
+                <p>{{ ai_analysis.user_reply }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="margin-top:16px;">
+            {% if ai_configured %}
+            Click <strong>Analyze Bug</strong> to generate AI triage for this issue.
+            {% else %}
+            Add `OPENAI_API_KEY` to enable the AI assistant for bug analysis.
+            {% endif %}
+        </div>
+        {% endif %}
+    </article>
+
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Discussion</h3>
+                <p class="card-subtitle">Reporter and fixer collaboration thread</p>
+            </div>
+            {% if role in ["fixer", "admin"] %}
+            <a class="btn" href="{{ url_for('edit_bug', id=bug['id']) }}">Manage</a>
+            {% endif %}
+        </div>
+
+        <form method="POST" class="form-grid" style="margin-top:16px;">
+            <input type="hidden" name="action" value="comment">
+            <div class="field">
+                <label>Add comment</label>
+                <textarea class="textarea" name="message" placeholder="Share context, progress, or next steps." required></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Post comment</button>
+            </div>
+        </form>
+
+        <div class="comment-list" style="margin-top:18px;">
+            {% for comment in comments %}
+            <div class="comment-card">
+                <div class="comment-head">
+                    <strong>{{ display_name(comment["author"]) }}</strong>
+                    <span>{{ comment["author_role"] }} - {{ comment["created_at"] }}</span>
+                </div>
+                <p class="desc-copy">{{ comment["message"] }}</p>
+            </div>
+            {% else %}
+            <div class="empty-state">No comments yet. Start the conversation here.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

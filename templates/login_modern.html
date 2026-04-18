@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | BugTracker AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+<div class="auth-shell">
+    <section class="auth-copy">
+        <p class="eyebrow">BugTracker AI</p>
+        <h1>Ship fixes faster with one clean bug workflow.</h1>
+        <p>Track reports, assign fixers, monitor trends, and keep users updated when issues are resolved.</p>
+
+        <div class="auth-points">
+            <div class="auth-point"><strong>Unified dashboard</strong><p>One place for metrics, workload, and status visibility.</p></div>
+            <div class="auth-point"><strong>Role-based workflow</strong><p>Users, fixers, and admins each get the right view.</p></div>
+            <div class="auth-point"><strong>Resolution updates</strong><p>Comments, status changes, and user notifications stay connected.</p></div>
+        </div>
+    </section>
+
+    <section class="auth-card">
+        <div class="auth-switch">
+            <a href="{{ url_for('login') }}" class="active">Login</a>
+            <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+        <div style="margin-top:24px;">
+            <h2>Welcome back</h2>
+            <p class="meta-copy">Sign in to continue to your workspace.</p>
+        </div>
+
+        {% include "_flash.html" %}
+
+        <div class="quick-login-grid">
+            {% for account in quick_accounts %}
+            <button type="button" class="quick-login-card" data-demo-username="{{ account.username }}" data-demo-password="{{ account.password }}">
+                <strong>{{ account.label }}</strong>
+                <span>{{ account.subtitle }}</span>
+                <small>{{ account.username }}</small>
+            </button>
+            {% endfor %}
+        </div>
+
+        <form method="POST" class="auth-form">
+            <div class="field">
+                <label>Username</label>
+                <input class="input" id="username" type="text" name="username" placeholder="Enter username" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input class="input" id="password" type="password" name="password" placeholder="Enter password" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+    </section>
+</div>
+
+<script>
+document.querySelectorAll("[data-demo-username]").forEach((button) => {
+    button.addEventListener("click", () => {
+        document.getElementById("username").value = button.dataset.demoUsername;
+        document.getElementById("password").value = button.dataset.demoPassword;
+    });
+});
+</script>
+</body>
+</html>

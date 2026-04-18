@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BugTracker AI{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <div class="brand-mark">B</div>
+            <div>
+                <strong>BugTracker AI</strong>
+                <span>AI-powered workflow</span>
+            </div>
+        </a>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="{{ url_for('dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('view_bugs') }}" class="nav-link {% if active_page == 'bugs' %}active{% endif %}">All Bugs</a>
+            {% if role != "fixer" %}
+            <a href="{{ url_for('add_bug') }}" class="nav-link {% if active_page == 'new-bug' %}active{% endif %}">Report Bug</a>
+            {% endif %}
+
+            <div class="nav-section">Manage</div>
+            <a href="{{ url_for('projects') }}" class="nav-link {% if active_page == 'projects' %}active{% endif %}">Projects</a>
+            <a href="{{ url_for('profile') }}" class="nav-link {% if active_page == 'profile' %}active{% endif %}">Profile</a>
+            {% if role == "admin" %}
+            <a href="{{ url_for('admin_panel') }}" class="nav-link {% if active_page == 'admin' %}active{% endif %}">Admin Panel</a>
+            {% endif %}
+
+            <div class="nav-section">Insights</div>
+            <a href="{{ url_for('analytics') }}" class="nav-link {% if active_page == 'analytics' %}active{% endif %}">Analytics</a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="avatar">{{ (session.get("user", "U")[0] if session.get("user") else "U")|upper }}</div>
+            <div>
+                <strong>{{ display_name(session.get("user", "User")) }}</strong>
+                <span>{{ role|title }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-pane">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Bug operations</p>
+                <h1>{% block page_title %}BugTracker AI{% endblock %}</h1>
+            </div>
+            <div class="topbar-actions">
+                <form method="GET" action="{{ url_for('view_bugs') }}" class="topbar-search">
+                    <input type="text" name="q" placeholder="Search bugs">
+                </form>
+                {% if role != "fixer" %}
+                <a href="{{ url_for('add_bug') }}" class="btn btn-primary">New Bug</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <section class="page-body">
+            {% include "_flash.html" %}
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+<button type="button" class="assistant-launcher" id="assistant-launcher">AI</button>
+<section class="assistant-widget" id="assistant-widget" aria-hidden="true">
+    <div class="assistant-header">
+        <div>
+            <strong>BugTracker AI</strong>
+            <span>Ask about bugs, workload, or summaries</span>
+        </div>
+        <button type="button" class="assistant-close" id="assistant-close">x</button>
+    </div>
+    <div class="assistant-body" id="assistant-body">
+        <div class="assistant-message assistant-message-bot">
+            I can summarize bugs, count open issues, and help you inspect the current queue.
+        </div>
+    </div>
+    <div class="assistant-suggestions">
+        <button type="button" class="assistant-chip" data-assistant-prompt="Summarize the current bug queue">Summarize queue</button>
+        <button type="button" class="assistant-chip" data-assistant-prompt="How many bugs are open right now?">Open bugs</button>
+        <button type="button" class="assistant-chip" data-assistant-prompt="Which fixer looks busiest?">Busiest fixer</button>
+    </div>
+    <form class="assistant-form" id="assistant-form">
+        <input type="text" id="assistant-input" placeholder="Ask BugTracker AI">
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</section>
+{% block scripts %}{% endblock %}
+</body>
+</html>

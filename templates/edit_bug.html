@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Bug | BugTracker AI{% endblock %}
+{% block page_title %}Manage Bug{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{% if role == "fixer" %}Resolve assigned bug{% else %}Manage bug workflow{% endif %}</h2>
+    <p>Update status, keep the report clear, and add a resolution note when work is complete.</p>
+</div>
+
+<section class="card">
+    <form method="POST" enctype="multipart/form-data" class="form-grid">
+        <div class="form-grid two-col">
+            <div class="field">
+                <label>Bug title</label>
+                <input class="input" type="text" name="title" value="{{ bug['title'] or '' }}" required>
+            </div>
+            <div class="field">
+                <label>App or website name</label>
+                <input class="input" type="text" name="app_name" value="{{ bug['app_name'] or '' }}" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Description</label>
+            <textarea class="textarea" name="description" required>{{ bug['description'] }}</textarea>
+        </div>
+
+        <div class="form-grid three-col">
+            <div class="field">
+                <label>Priority</label>
+                <select class="select" name="priority" required>
+                    {% for priority in ["High", "Medium", "Low"] %}
+                    <option value="{{ priority }}" {% if bug['priority'] == priority %}selected{% endif %}>{{ priority }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Status</label>
+                <select class="select" name="status" required>
+                    {% for status in ["Open", "In Progress", "Resolved", "Closed"] %}
+                    <option value="{{ status }}" {% if bug['status'] == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Assigned to</label>
+                <input class="input" type="text" name="assigned_to" value="{{ bug['assigned_to'] }}" required {% if role != "fixer" %}readonly{% endif %}>
+                <div class="meta-copy">Shown as {{ display_name(bug['assigned_to']) }} in the app.</div>
+            </div>
+        </div>
+
+        <div class="form-grid two-col">
+            <div class="field">
+                <label>User contact</label>
+                <input class="input" type="text" name="contact" value="{{ bug['contact'] or '' }}" required>
+            </div>
+            <div class="field">
+                <label>Screenshot</label>
+                <input class="input" type="file" name="screenshot" accept=".png,.jpg,.jpeg,.gif,.webp">
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Resolution note</label>
+            <textarea class="textarea" name="resolution_note" placeholder="Explain what changed for the user.">{{ bug['resolution_note'] or '' }}</textarea>
+        </div>
+
+        {% if bug["screenshot_path"] %}
+        <div class="field">
+            <label>Current screenshot</label>
+            <a href="{{ url_for('static', filename=bug['screenshot_path']) }}" target="_blank">
+                <img class="screenshot-thumb" src="{{ url_for('static', filename=bug['screenshot_path']) }}" alt="Bug screenshot">
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save changes</button>
+            <a class="btn" href="{{ url_for('view_bugs') }}">Back</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

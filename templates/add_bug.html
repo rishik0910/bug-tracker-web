@@ -1,0 +1,88 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Report Bug | BugTracker AI{% endblock %}
+{% block page_title %}Report Bug{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <div>
+        <p class="eyebrow">New report</p>
+        <h2>Capture the issue once. We will route it to the right fixer.</h2>
+        <p class="meta-copy">Describe what broke, attach a screenshot if needed, and we will track the rest of the workflow for you.</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);box-shadow:none;">
+        <h3 style="margin-top:0;">Workflow</h3>
+        <p class="meta-copy">1. Submit the bug.</p>
+        <p class="meta-copy">2. A fixer is assigned automatically.</p>
+        <p class="meta-copy">3. You will get a confirmation email now and another update when it is solved.</p>
+    </div>
+</section>
+
+<section class="card">
+    <form method="POST" enctype="multipart/form-data" class="form-grid">
+        <div class="form-grid two-col">
+            <div class="field">
+                <label>Bug title</label>
+                <input class="input" type="text" name="title" placeholder="Login button does not respond" required>
+            </div>
+            <div class="field">
+                <label>App or website name</label>
+                <input class="input" type="text" name="app_name" placeholder="example.com or mobile app" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Description</label>
+            <textarea class="textarea" name="description" placeholder="Describe what happened, where it happened, and how to reproduce it." required></textarea>
+        </div>
+
+        <div class="form-grid two-col">
+            <div class="field">
+                <label>Contact email or phone</label>
+                <input class="input" type="text" name="contact" value="{{ user_email }}" placeholder="Enter email to receive confirmation and resolution updates" required>
+            </div>
+            <div class="field">
+                <label>Priority</label>
+                <select class="select" name="priority" required>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Screenshot</label>
+            <label class="file-dropzone" for="screenshot">
+                <input id="screenshot" class="file-input" type="file" name="screenshot" accept=".png,.jpg,.jpeg,.gif,.webp">
+                <span class="file-icon">+</span>
+                <span class="file-copy">
+                    <strong>Choose or drop a screenshot</strong>
+                    <span id="file-name">PNG, JPG, GIF, or WEBP</span>
+                </span>
+                <span class="file-pill">Browse</span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Submit report</button>
+            <a class="btn" href="{{ url_for('view_bugs') }}">Back to bug list</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const screenshotInput = document.getElementById("screenshot");
+const fileName = document.getElementById("file-name");
+
+if (screenshotInput && fileName) {
+    screenshotInput.addEventListener("change", () => {
+        fileName.textContent = screenshotInput.files.length
+            ? screenshotInput.files[0].name
+            : "PNG, JPG, GIF, or WEBP";
+    });
+}
+</script>
+{% endblock %}

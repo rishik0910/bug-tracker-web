@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Projects | BugTracker AI{% endblock %}
+{% block page_title %}Projects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Projects</h2>
+    <p>Grouped bug activity by app or website name from your existing reports.</p>
+</div>
+
+<section class="project-grid">
+    {% for project in projects %}
+    <article class="project-card">
+        <div class="project-top">
+            <div>
+                <h3 class="card-title">{{ project.name }}</h3>
+                <p class="card-subtitle">Latest report: {{ project.latest_created_at }}</p>
+            </div>
+            <span class="badge">{{ project.total }} bugs</span>
+        </div>
+        <p class="desc-copy">{{ project.latest_title }}</p>
+        <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 0;">
+            <div class="metric-card"><span>Open</span><strong style="font-size:22px;">{{ project.open }}</strong></div>
+            <div class="metric-card"><span>In progress</span><strong style="font-size:22px;">{{ project.in_progress }}</strong></div>
+            <div class="metric-card"><span>Resolved</span><strong style="font-size:22px;">{{ project.resolved }}</strong></div>
+        </div>
+    </article>
+    {% else %}
+    <div class="empty-state">No projects yet. Add bugs with an app or website name to populate this view.</div>
+    {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | BugTracker AI{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="hero-card">
+    <div>
+        <p class="eyebrow">AI workspace</p>
+        <h2>Welcome back, {{ user }}</h2>
+        <p class="meta-copy">
+            {% if role == "admin" %}
+            Monitor the full workflow, track delivery risk, and keep assignments moving.
+            {% elif role == "fixer" %}
+            Review your assigned bugs, update progress, and close issues with clear notes.
+            {% else %}
+            Report bugs, track fixes, and stay updated from one dashboard.
+            {% endif %}
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('view_bugs') }}" class="btn">Open bug list</a>
+            {% if role != "fixer" %}
+            <a href="{{ url_for('add_bug') }}" class="btn btn-primary">Report a new bug</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);box-shadow:none;">
+        <p class="eyebrow">Live summary</p>
+        <h3 style="margin:0 0 10px;">{{ metrics.total }} tracked bugs</h3>
+        <p class="meta-copy">Open: {{ metrics.open }} | In progress: {{ metrics.in_progress }} | Resolved: {{ metrics.resolved }}</p>
+        <div class="status-bars" style="margin-top:16px;">
+            {% for item in metrics.workload[:3] %}
+            <div class="workload-row">
+                <div class="stack-row">
+                    <strong>{{ display_name(item.name) }}</strong>
+                    <span>{{ item.count }}</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill" style="width:{{ item.percent }}%"></div></div>
+            </div>
+            {% else %}
+            <p class="meta-copy">Developer workload appears once assignments exist.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="metric-card">
+        <span>Total bugs</span>
+        <strong>{{ metrics.total }}</strong>
+        <span>Across your visible workspace</span>
+    </article>
+    <article class="metric-card">
+        <span>Open</span>
+        <strong style="color:#dc2626;">{{ metrics.open }}</strong>
+        <span>Need attention now</span>
+    </article>
+    <article class="metric-card">
+        <span>In progress</span>
+        <strong style="color:#d97706;">{{ metrics.in_progress }}</strong>
+        <span>Currently being worked</span>
+    </article>
+    <article class="metric-card">
+        <span>Resolved</span>
+        <strong style="color:#16a34a;">{{ metrics.resolved }}</strong>
+        <span>Resolved or closed</span>
+    </article>
+</section>
+
+<section class="card-grid">
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Bug trend</h3>
+                <p class="card-subtitle">New vs resolved over the last 7 days</p>
+            </div>
+        </div>
+        <div class="chart-box"><canvas id="trendChart"></canvas></div>
+    </article>
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Priority mix</h3>
+                <p class="card-subtitle">Based on recorded bug priorities</p>
+            </div>
+        </div>
+        <div class="chart-box"><canvas id="severityChart"></canvas></div>
+    </article>
+</section>
+
+<section class="split-grid" style="grid-template-columns:1fr 1fr;">
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Developer workload</h3>
+                <p class="card-subtitle">Assigned bug volume by fixer</p>
+            </div>
+        </div>
+        <div class="workload-list">
+            {% for item in metrics.workload %}
+            <div class="workload-row">
+                <div class="stack-row">
+                    <strong>{{ display_name(item.name) }}</strong>
+                    <span>{{ item.count }} bugs</span>
+                </div>
+                <div class="bar-track"><div class="bar-fill" style="width:{{ item.percent }}%"></div></div>
+            </div>
+            {% else %}
+            <div class="empty-state">No assigned bugs yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="list-card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">
+                    {% if role == "fixer" %}Resolved assignments{% elif role == "admin" %}Recent activity{% else %}Fix notifications{% endif %}
+                </h3>
+                <p class="card-subtitle">Latest updates from the workflow</p>
+            </div>
+        </div>
+        <div class="comment-list">
+            {% for bug in notifications %}
+            <div class="comment-card">
+                <div class="comment-head">
+                    <strong>{{ bug["title"] or "Bug report" }}</strong>
+                    <span>{{ bug["fixed_at"] or bug["created_at"] }}</span>
+                </div>
+                <p class="desc-copy">{{ bug["app_name"] or "General project" }} • {{ bug["status"] }} • {{ display_name(bug["assigned_to"]) }}</p>
+                {% if bug["resolution_note"] %}
+                <p class="desc-copy">{{ bug["resolution_note"] }}</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="empty-state">No recent updates yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const chartData = {{ chart_data|safe }};
+
+new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+        labels: chartData.trendLabels,
+        datasets: [
+            { label: "New", data: chartData.newBugValues, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.12)", tension: 0.35, fill: true },
+            { label: "Resolved", data: chartData.resolvedValues, borderColor: "#16a34a", backgroundColor: "rgba(22,163,74,0.1)", tension: 0.35, fill: true }
+        ]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+});
+
+new Chart(document.getElementById("severityChart"), {
+    type: "doughnut",
+    data: {
+        labels: chartData.severityLabels,
+        datasets: [{ data: chartData.severityValues, backgroundColor: chartData.severityColors, borderWidth: 0 }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | BugTracker AI{% endblock %}
+{% block page_title %}Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ display_name(user["username"]) }} profile</h2>
+    <p>Manage your account identity and keep your fixer login secure.</p>
+</div>
+
+<section class="split-grid" style="grid-template-columns:0.85fr 1.15fr;">
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Account overview</h3>
+                <p class="card-subtitle">Current login information</p>
+            </div>
+        </div>
+        <div class="status-bars" style="margin-top:16px;">
+            <div class="status-row">
+                <strong>Name</strong>
+                <div class="meta-copy">{{ display_name(user["username"]) }}</div>
+            </div>
+            <div class="status-row">
+                <strong>Username</strong>
+                <div class="meta-copy">{{ user["username"] }}</div>
+            </div>
+            <div class="status-row">
+                <strong>Email</strong>
+                <div class="meta-copy">{{ user["email"] or "No email" }}</div>
+            </div>
+            <div class="status-row">
+                <strong>Role</strong>
+                <div class="meta-copy">{{ user["role"]|title }}</div>
+            </div>
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="card-title-row">
+            <div>
+                <h3 class="card-title">Change password</h3>
+                <p class="card-subtitle">Set a personal password after onboarding</p>
+            </div>
+        </div>
+        <form method="POST" class="form-grid" style="margin-top:16px;">
+            <div class="field">
+                <label>Current password</label>
+                <input class="input" type="password" name="current_password" required>
+            </div>
+            <div class="field">
+                <label>New password</label>
+                <input class="input" type="password" name="new_password" required>
+            </div>
+            <div class="field">
+                <label>Confirm new password</label>
+                <input class="input" type="password" name="confirm_password" required>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Update password</button>
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}

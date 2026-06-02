@@ -53,8 +53,10 @@ DEFAULT_ADMIN_ACCOUNT = {
     "email": "admin@bugtracker.local",
     "password": "admin",
 }
-
-create_tables()
+try:
+    create_tables()
+except Exception as e:
+    print("Database setup skipped:", e)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 

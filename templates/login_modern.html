@@ -37,11 +37,27 @@
 
         <div class="quick-login-grid">
             {% for account in quick_accounts %}
-            <button type="button" class="quick-login-card" data-demo-username="{{ account.username }}" data-demo-password="{{ account.password }}">
-                <strong>{{ account.label }}</strong>
-                <span>{{ account.subtitle }}</span>
-                <small>{{ account.username }}</small>
-            </button>
+                {% if account.label == "Fixer" %}
+                <div class="quick-login-card fixer-selector-card">
+                    <button type="button" class="fixer-selector-toggle" id="fixer-toggle">
+                        <strong>{{ account.label }}</strong>
+                        <span>{{ account.subtitle }}</span>
+                    </button>
+                    <div class="fixer-selector-list" id="fixer-list">
+                        {% for fixer in login_fixers %}
+                        <button type="button" class="fixer-option" data-fixer-username="{{ fixer.username }}">
+                            <strong>{{ fixer.label }}</strong>
+                            <span>Select {{ fixer.label }} and enter password</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <button type="button" class="quick-login-card" data-demo-username="{{ account.username }}" data-demo-password="{{ account.password }}">
+                    <strong>{{ account.label }}</strong>
+                    <span>{{ account.subtitle }}</span>
+                </button>
+                {% endif %}
             {% endfor %}
         </div>
 
@@ -60,11 +76,30 @@
 </div>
 
 <script>
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const fixerToggle = document.getElementById("fixer-toggle");
+const fixerList = document.getElementById("fixer-list");
+
 document.querySelectorAll("[data-demo-username]").forEach((button) => {
     button.addEventListener("click", () => {
-        document.getElementById("username").value = button.dataset.demoUsername;
-        document.getElementById("password").value = button.dataset.demoPassword;
+        usernameInput.value = button.dataset.demoUsername;
+        passwordInput.value = button.dataset.demoPassword;
+        fixerList?.classList.remove("open");
     });
+});
+
+document.querySelectorAll("[data-fixer-username]").forEach((button) => {
+    button.addEventListener("click", () => {
+        usernameInput.value = button.dataset.fixerUsername;
+        passwordInput.value = "";
+        passwordInput.focus();
+        fixerList?.classList.remove("open");
+    });
+});
+
+fixerToggle?.addEventListener("click", () => {
+    fixerList?.classList.toggle("open");
 });
 </script>
 </body>

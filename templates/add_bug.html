@@ -4,71 +4,115 @@
 {% block page_title %}Report Bug{% endblock %}
 
 {% block content %}
-<section class="hero-card">
-    <div>
-        <p class="eyebrow">New report</p>
-        <h2>Capture the issue once. We will route it to the right fixer.</h2>
-        <p class="meta-copy">Describe what broke, attach a screenshot if needed, and we will track the rest of the workflow for you.</p>
-    </div>
-    <div class="card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);box-shadow:none;">
-        <h3 style="margin-top:0;">Workflow</h3>
-        <p class="meta-copy">1. Submit the bug.</p>
-        <p class="meta-copy">2. A fixer is assigned automatically.</p>
-        <p class="meta-copy">3. You will get a confirmation email now and another update when it is solved.</p>
-    </div>
-</section>
+<section class="report-shell">
+    <article class="report-story">
+        <div class="report-badge">Bug Fix Desk</div>
+        <h2>Report issues with clarity and get them fixed faster.</h2>
+        <p class="report-copy">Submit the bug details once. We assign it to a fixer, track the status, and send confirmation and resolution updates automatically.</p>
 
-<section class="card">
-    <form method="POST" enctype="multipart/form-data" class="form-grid">
-        <div class="form-grid two-col">
+        <div class="report-steps">
+            <div class="report-step">
+                <div class="report-step-no">01</div>
+                <div>
+                    <h3>Submit report</h3>
+                    <p>Describe the issue and affected app with enough context for a fast start.</p>
+                </div>
+            </div>
+            <div class="report-step">
+                <div class="report-step-no">02</div>
+                <div>
+                    <h3>Auto assign</h3>
+                    <p>The system routes the bug to the right fixer based on the current workload.</p>
+                </div>
+            </div>
+            <div class="report-step">
+                <div class="report-step-no">03</div>
+                <div>
+                    <h3>Get notified</h3>
+                    <p>You receive a confirmation email now and another update when the issue is solved.</p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="report-form-card">
+        <div class="report-form-top">
+            <div>
+                <div class="report-badge report-badge-soft">New Report</div>
+                <h3>Bug Details</h3>
+            </div>
+            <div class="report-icon-wrap">+</div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="form-grid report-form-grid">
             <div class="field">
                 <label>Bug title</label>
-                <input class="input" type="text" name="title" placeholder="Login button does not respond" required>
+                <div class="report-input-wrap">
+                    <span class="report-input-icon">H</span>
+                    <input class="input report-input" type="text" name="title" placeholder="Login button does not respond" required>
+                </div>
             </div>
+
             <div class="field">
                 <label>App or website name</label>
-                <input class="input" type="text" name="app_name" placeholder="example.com or mobile app" required>
+                <div class="report-input-wrap">
+                    <span class="report-input-icon">[]</span>
+                    <input class="input report-input" type="text" name="app_name" placeholder="Mobile app / example.com" required>
+                </div>
             </div>
-        </div>
 
-        <div class="field">
-            <label>Description</label>
-            <textarea class="textarea" name="description" placeholder="Describe what happened, where it happened, and how to reproduce it." required></textarea>
-        </div>
+            <div class="field">
+                <label>Description</label>
+                <div class="report-textarea-wrap">
+                    <span class="report-input-icon">=</span>
+                    <textarea class="textarea report-textarea" name="description" placeholder="Describe the issue clearly..." required></textarea>
+                </div>
+            </div>
 
-        <div class="form-grid two-col">
+            <div class="report-ai-strip" id="duplicate-check-panel" hidden>
+                <strong>AI duplicate check</strong>
+                <div class="meta-copy">These reports look similar to what you are writing right now.</div>
+                <div class="report-duplicate-list" id="duplicate-check-results"></div>
+            </div>
+
             <div class="field">
                 <label>Contact email or phone</label>
-                <input class="input" type="text" name="contact" value="{{ user_email }}" placeholder="Enter email to receive confirmation and resolution updates" required>
+                <div class="report-input-wrap">
+                    <span class="report-input-icon">@</span>
+                    <input class="input report-input" type="text" name="contact" value="{{ user_email }}" placeholder="So we can notify you when it is fixed" required>
+                </div>
             </div>
+
             <div class="field">
                 <label>Priority</label>
-                <select class="select" name="priority" required>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                </select>
+                <div class="priority-select-wrap">
+                    <select class="select report-priority" name="priority" required>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
             </div>
-        </div>
 
-        <div class="field">
-            <label>Screenshot</label>
-            <label class="file-dropzone" for="screenshot">
-                <input id="screenshot" class="file-input" type="file" name="screenshot" accept=".png,.jpg,.jpeg,.gif,.webp">
-                <span class="file-icon">+</span>
-                <span class="file-copy">
-                    <strong>Choose or drop a screenshot</strong>
-                    <span id="file-name">PNG, JPG, GIF, or WEBP</span>
-                </span>
-                <span class="file-pill">Browse</span>
-            </label>
-        </div>
+            <div class="field">
+                <label>Screenshot</label>
+                <label class="file-dropzone report-dropzone" for="screenshot">
+                    <input id="screenshot" class="file-input" type="file" name="screenshot" accept=".png,.jpg,.jpeg,.gif,.webp">
+                    <span class="file-icon report-file-icon">+</span>
+                    <span class="file-copy">
+                        <strong>Choose or drop a screenshot</strong>
+                        <span id="file-name">PNG, JPG, GIF, or WEBP</span>
+                    </span>
+                    <span class="file-pill">Browse</span>
+                </label>
+            </div>
 
-        <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Submit report</button>
-            <a class="btn" href="{{ url_for('view_bugs') }}">Back to bug list</a>
-        </div>
-    </form>
+            <div class="form-actions report-actions">
+                <button class="btn btn-primary report-submit" type="submit">Submit Report</button>
+                <a class="btn report-secondary" href="{{ url_for('view_bugs') }}">Back to bug list</a>
+            </div>
+        </form>
+    </article>
 </section>
 {% endblock %}
 
@@ -76,6 +120,11 @@
 <script>
 const screenshotInput = document.getElementById("screenshot");
 const fileName = document.getElementById("file-name");
+const duplicatePanel = document.getElementById("duplicate-check-panel");
+const duplicateResults = document.getElementById("duplicate-check-results");
+const titleInput = document.querySelector('input[name="title"]');
+const appInput = document.querySelector('input[name="app_name"]');
+const descriptionInput = document.querySelector('textarea[name="description"]');
 
 if (screenshotInput && fileName) {
     screenshotInput.addEventListener("change", () => {
@@ -84,5 +133,59 @@ if (screenshotInput && fileName) {
             : "PNG, JPG, GIF, or WEBP";
     });
 }
+
+let duplicateTimer;
+
+async function checkDuplicates() {
+    if (!titleInput || !descriptionInput || !appInput || !duplicatePanel || !duplicateResults) return;
+
+    const title = titleInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const app_name = appInput.value.trim();
+
+    if (title.length < 4 && description.length < 12) {
+        duplicatePanel.hidden = true;
+        duplicateResults.innerHTML = "";
+        return;
+    }
+
+    try {
+        const response = await fetch("/bug/check-duplicates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, description, app_name })
+        });
+        const data = await response.json();
+        const matches = data.matches || [];
+
+        if (!matches.length) {
+            duplicatePanel.hidden = true;
+            duplicateResults.innerHTML = "";
+            return;
+        }
+
+        duplicateResults.innerHTML = matches.map((match) => `
+            <a class="report-duplicate-item" href="/bug/${match.id}">
+                <div class="report-duplicate-top">
+                    <strong>#${match.id} ${match.title}</strong>
+                    <em>${match.confidence}</em>
+                </div>
+                <span>${match.app_name} • ${match.status}</span>
+                ${match.shared_terms?.length ? `<small>Shared terms: ${match.shared_terms.join(", ")}</small>` : ""}
+            </a>
+        `).join("");
+        duplicatePanel.hidden = false;
+    } catch (error) {
+        duplicatePanel.hidden = true;
+        duplicateResults.innerHTML = "";
+    }
+}
+
+[titleInput, appInput, descriptionInput].forEach((field) => {
+    field?.addEventListener("input", () => {
+        window.clearTimeout(duplicateTimer);
+        duplicateTimer = window.setTimeout(checkDuplicates, 320);
+    });
+});
 </script>
 {% endblock %}

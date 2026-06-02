@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("assistant-form");
     const input = document.getElementById("assistant-input");
     const body = document.getElementById("assistant-body");
+    const logoutLink = document.querySelector(".sidebar-logout-button");
 
     const appendMessage = (text, sender) => {
         if (!body) return;
@@ -36,6 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     closeButton?.addEventListener("click", () => {
         toggleWidget(false);
+    });
+
+    logoutLink?.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = logoutLink.getAttribute("href") || "/logout";
+        window.location.assign(target);
     });
 
     document.querySelectorAll("[data-assistant-prompt]").forEach((button) => {

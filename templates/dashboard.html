@@ -10,7 +10,7 @@
 <section class="hero-card">
     <div>
         <p class="eyebrow">AI workspace</p>
-        <h2>Welcome back, {{ user }}</h2>
+        <h2>Welcome back, {{ role_label(role) }}</h2>
         <p class="meta-copy">
             {% if role == "admin" %}
             Monitor the full workflow, track delivery risk, and keep assignments moving.

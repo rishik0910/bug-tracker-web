@@ -46,7 +46,15 @@
             </div>
             <div class="field">
                 <label>Assigned to</label>
-                <input class="input" type="text" name="assigned_to" value="{{ bug['assigned_to'] }}" required {% if role != "fixer" %}readonly{% endif %}>
+                {% if role == "admin" %}
+                <select class="select" name="assigned_to" required>
+                    {% for fixer in fixers %}
+                    <option value="{{ fixer['username'] }}" {% if bug['assigned_to'] == fixer['username'] %}selected{% endif %}>{{ display_name(fixer["username"]) }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input class="input" type="text" name="assigned_to" value="{{ bug['assigned_to'] }}" required readonly>
+                {% endif %}
                 <div class="meta-copy">Shown as {{ display_name(bug['assigned_to']) }} in the app.</div>
             </div>
         </div>
@@ -65,6 +73,12 @@
         <div class="field">
             <label>Resolution note</label>
             <textarea class="textarea" name="resolution_note" placeholder="Explain what changed for the user.">{{ bug['resolution_note'] or '' }}</textarea>
+        </div>
+
+        <div class="field">
+            <label>Progress note</label>
+            <textarea class="textarea" name="progress_note" placeholder="Optional: add a short update like 'Started checking login API' or 'Fix verified locally'."></textarea>
+            <div class="meta-copy">This note appears in the discussion and reporter timeline.</div>
         </div>
 
         {% if bug["screenshot_path"] %}

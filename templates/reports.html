@@ -51,17 +51,93 @@
     </form>
 </section>
 
-<section class="list-card" style="margin-top:18px;">
+<section class="list-card {% if role == 'user' %}reporter-tracker-shell{% endif %}" style="margin-top:18px;">
     <div class="table-toolbar">
         <div>
-            <h3 class="card-title">Bug list</h3>
+            <h3 class="card-title">{% if role == "user" %}Tracking board{% else %}Bug list{% endif %}</h3>
             <p class="card-subtitle">{{ bugs|length }} visible reports</p>
         </div>
         {% if role == "fixer" %}
         <div class="queue-chip">Your assigned bug queue with quick status controls</div>
+        {% elif role == "user" %}
+        <div class="queue-chip">Follow each report from creation to closure</div>
         {% endif %}
     </div>
 
+    {% if role == "user" %}
+    <div class="reporter-card-grid">
+        {% for item in reporter_cards %}
+        <article class="reporter-ticket-card">
+            <div class="reporter-ticket-head">
+                <div>
+                    <div class="eyebrow">Bug #{{ item.bug["id"] }}</div>
+                    <h4>{{ item.bug["title"] or "Bug report" }}</h4>
+                </div>
+                <span class="badge badge-{{ item.bug['status']|lower|replace(' ', '-') }}">{{ item.bug["status"] }}</span>
+            </div>
+            <div class="meta-copy">{{ item.bug["app_name"] or "General project" }} • {{ item.bug["created_at"] }}</div>
+            <p class="desc-copy">{{ item.bug["description"] }}</p>
+
+            <div class="reporter-progress-strip">
+                <div class="reporter-progress-head">
+                    <span>Workflow progress</span>
+                    <strong>{{ item.progress_percent }}%</strong>
+                </div>
+                <div class="bar-track reporter-progress-track">
+                    <div class="bar-fill reporter-progress-fill" style="width: {{ item.progress_percent }}%;"></div>
+                </div>
+            </div>
+
+            <div class="reporter-steps">
+                {% for step in item.steps %}
+                <div class="reporter-step {% if step.active %}active{% endif %} {% if step.current %}current{% endif %}">
+                    <span></span>
+                    <strong>{{ step.label }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="reporter-ticket-meta">
+                <div class="reporter-meta-card">
+                    <span>Assigned fixer</span>
+                    <strong>{{ display_name(item.bug["assigned_to"]) }}</strong>
+                </div>
+                <div class="reporter-meta-card">
+                    <span>Priority</span>
+                    <strong>{{ item.bug["priority"] }}</strong>
+                </div>
+                <div class="reporter-meta-card">
+                    <span>Next step</span>
+                    <strong class="reporter-next-step">{{ item.next_step }}</strong>
+                </div>
+            </div>
+
+            <div class="reporter-update-card">
+                <span>Latest update</span>
+                <p>{{ item.last_update }}</p>
+                <div class="meta-copy">{{ item.last_update_at }}</div>
+            </div>
+
+            {% if item.events %}
+            <div class="reporter-mini-timeline">
+                {% for event in item.events %}
+                <div class="reporter-mini-event">
+                    <strong>{{ event["event_type"]|replace("_", " ")|title }}</strong>
+                    <span>{{ event["created_at"] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="inline-actions">
+                <a class="btn btn-ghost" href="{{ url_for('bug_detail', id=item.bug['id']) }}">Open details</a>
+            </div>
+        </article>
+        {% else %}
+        <div class="empty-state">No bug reports matched your filters.</div>
+        {% endfor %}
+    </div>
+    {% else %}
     <div class="table-list">
         <div class="table-row table-head">
             <div>ID</div>
@@ -79,6 +155,12 @@
                 <strong>{{ bug["title"] or "Bug report" }}</strong>
                 <div class="meta-copy">{{ bug["app_name"] or "General" }} - {{ bug["created_at"] }}</div>
                 <div class="desc-copy">{{ bug["description"] }}</div>
+                {% if bug["ai_summary"] %}
+                <div class="ai-inline-note">
+                    <strong>AI:</strong> {{ bug["ai_summary"] }}
+                    {% if bug["ai_priority"] %}<span>Suggested: {{ bug["ai_priority"] }}</span>{% endif %}
+                </div>
+                {% endif %}
             </div>
             <div>
                 {% if role == "fixer" %}
@@ -93,7 +175,7 @@
             <div><span class="badge badge-{{ bug['priority']|lower }}">{{ bug["priority"] }}</span></div>
             <div>
                 <span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span>
-                {% if role == "fixer" %}
+                {% if role in ["fixer", "admin"] %}
                 <form method="POST" action="{{ url_for('update_bug_status', id=bug['id']) }}" class="quick-status-form">
                     <select class="quick-status-select" name="status" onchange="this.form.submit()">
                         {% for status in ["Open", "In Progress", "Resolved", "Closed"] %}
@@ -101,6 +183,15 @@
                         {% endfor %}
                     </select>
                     <input type="hidden" name="resolution_note" value="{{ bug['resolution_note'] or '' }}">
+                </form>
+                {% endif %}
+                {% if role == "admin" %}
+                <form method="POST" action="{{ url_for('reassign_bug', id=bug['id']) }}" class="quick-status-form">
+                    <select class="quick-status-select" name="assigned_to" onchange="this.form.submit()">
+                        {% for fixer in fixers %}
+                        <option value="{{ fixer['username'] }}" {% if bug["assigned_to"] == fixer["username"] %}selected{% endif %}>{{ display_name(fixer["username"]) }}</option>
+                        {% endfor %}
+                    </select>
                 </form>
                 {% endif %}
             </div>
@@ -116,5 +207,6 @@
         <div class="empty-state">No bug reports matched your filters.</div>
         {% endfor %}
     </div>
+    {% endif %}
 </section>
 {% endblock %}

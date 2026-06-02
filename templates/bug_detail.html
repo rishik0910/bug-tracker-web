@@ -26,6 +26,42 @@
         </div>
         {% endif %}
 
+        {% if bug["ai_resolution_summary"] %}
+        <div class="workload-row" style="margin-top:18px;">
+            <strong>AI resolution summary</strong>
+            <p class="desc-copy">{{ bug["ai_resolution_summary"] }}</p>
+        </div>
+        {% endif %}
+
+        {% if bug["steps"] %}
+        <div class="ai-block" style="margin-top:18px;">
+            <h4>AI-generated reproduction steps</h4>
+            <ul class="ai-list">
+                {% for step in bug["steps"].split('\n') if step.strip() %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="timeline-panel" style="margin-top:18px;">
+            <h3 class="card-title">Status timeline</h3>
+            <div class="timeline-list">
+                {% for event in events %}
+                <div class="timeline-item timeline-{{ event['event_type'] }}">
+                    <span></span>
+                    <div>
+                        <strong>{{ event["event_type"]|replace("_", " ")|title }}</strong>
+                        <p class="desc-copy">{{ event["message"] }}</p>
+                        <div class="meta-copy">{{ display_name(event["actor"]) }} - {{ event["created_at"] }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">Timeline will appear as the team works on this bug.</div>
+                {% endfor %}
+            </div>
+        </div>
+
         {% if bug["screenshot_path"] %}
         <div style="margin-top:18px;">
             <a href="{{ url_for('static', filename=bug['screenshot_path']) }}" target="_blank">
@@ -61,7 +97,7 @@
             </div>
 
             <div class="ai-block">
-                <h4>Summary</h4>
+                <h4>Smart summary</h4>
                 <p>{{ ai_analysis.summary }}</p>
             </div>
             <div class="ai-block">
@@ -69,7 +105,7 @@
                 <p>{{ ai_analysis.suspected_cause }}</p>
             </div>
             <div class="ai-block">
-                <h4>Debugging steps</h4>
+                <h4>Suggested fix plan</h4>
                 <ul class="ai-list">
                     {% for step in ai_analysis.debugging_steps %}
                     <li>{{ step }}</li>
@@ -117,6 +153,19 @@
                 <button class="btn btn-primary" type="submit">Post comment</button>
             </div>
         </form>
+
+        {% if role in ["fixer", "admin"] %}
+        <form method="POST" class="form-grid progress-note-form">
+            <input type="hidden" name="action" value="progress_note">
+            <div class="field">
+                <label>Fixer progress note</label>
+                <textarea class="textarea" name="message" placeholder="Example: Started checking the login API response and validation flow." required></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn" type="submit">Add progress note</button>
+            </div>
+        </form>
+        {% endif %}
 
         <div class="comment-list" style="margin-top:18px;">
             {% for comment in comments %}

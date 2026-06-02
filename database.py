@@ -63,6 +63,17 @@ def create_tables():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS bug_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bug_id INTEGER,
+        event_type TEXT,
+        actor TEXT,
+        message TEXT,
+        created_at TEXT
+    )
+    """)
+
     migrate_users_table(cursor)
     migrate_bugs_table(cursor)
     migrate_bug_status_values(cursor)
@@ -98,7 +109,13 @@ def migrate_bugs_table(cursor):
         "contact": "TEXT",
         "resolution_note": "TEXT",
         "fixed_at": "TEXT",
-        "screenshot_path": "TEXT"
+        "screenshot_path": "TEXT",
+        "ai_summary": "TEXT",
+        "ai_priority": "TEXT",
+        "ai_suspected_cause": "TEXT",
+        "ai_fix_plan": "TEXT",
+        "ai_repro_steps": "TEXT",
+        "ai_resolution_summary": "TEXT"
     }
 
     for column_name, column_type in new_columns.items():
@@ -209,6 +226,23 @@ def update_user_password(username, new_password):
     return updated
 
 
+def delete_fixer_account(username):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) AS count FROM bugs WHERE assigned_to=?", (username,))
+    assigned_count = cursor.fetchone()["count"]
+
+    if assigned_count:
+        conn.close()
+        return False
+
+    cursor.execute("DELETE FROM users WHERE username=? AND role='fixer'", (username,))
+    deleted = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return deleted
+
+
 def add_bug_db(title, description, priority, status, assigned_to, reporter, app_name, steps, expected_result, actual_result, contact, screenshot_path=""):
     conn = get_connection()
     cursor = conn.cursor()
@@ -232,6 +266,61 @@ def add_bug_db(title, description, priority, status, assigned_to, reporter, app_
     conn.commit()
     conn.close()
     return bug_id
+
+
+def update_bug_ai_fields(
+    bug_id,
+    ai_summary,
+    ai_priority,
+    ai_suspected_cause,
+    ai_fix_plan,
+    ai_repro_steps="",
+    ai_resolution_summary=""
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE bugs
+        SET ai_summary=?, ai_priority=?, ai_suspected_cause=?, ai_fix_plan=?, ai_repro_steps=?, ai_resolution_summary=?
+        WHERE id=?
+        """,
+        (
+            ai_summary,
+            ai_priority,
+            ai_suspected_cause,
+            ai_fix_plan,
+            ai_repro_steps,
+            ai_resolution_summary,
+            bug_id
+        )
+    )
+    conn.commit()
+    conn.close()
+
+
+def record_bug_event(bug_id, event_type, actor, message):
+    conn = get_connection()
+    cursor = conn.cursor()
+    created_at = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    cursor.execute(
+        """
+        INSERT INTO bug_events (bug_id, event_type, actor, message, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (bug_id, event_type, actor, message, created_at)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_bug_events(bug_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bug_events WHERE bug_id=? ORDER BY id ASC", (bug_id,))
+    events = cursor.fetchall()
+    conn.close()
+    return events
 
 
 def get_bugs():

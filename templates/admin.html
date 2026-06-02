@@ -4,36 +4,60 @@
 {% block page_title %}Admin Panel{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2>Admin panel</h2>
-    <p>Monitor system health, users, and bug flow from one control center.</p>
-</div>
-
-<section class="stats-grid">
-    <article class="metric-card"><span>Total bugs</span><strong>{{ total_bugs }}</strong><span>Recorded in the system</span></article>
-    <article class="metric-card"><span>Total users</span><strong>{{ total_users }}</strong><span>All accounts</span></article>
-    <article class="metric-card"><span>Total fixers</span><strong>{{ total_fixers }}</strong><span>Assignable team members</span></article>
-    <article class="metric-card"><span>Open bugs</span><strong style="color:#dc2626;">{{ open_bugs }}</strong><span>Still waiting</span></article>
+<section class="admin-hero">
+    <div class="admin-hero-copy">
+        <p class="eyebrow">Control Center</p>
+        <h2>Admin panel</h2>
+        <p>Monitor team load, bug health, and fixer operations from one structured workspace.</p>
+    </div>
+    <div class="admin-hero-chip">
+        <strong>{{ total_bugs }}</strong>
+        <span>tracked issues across the workspace</span>
+    </div>
 </section>
 
-<section class="split-grid" style="grid-template-columns:1.15fr 0.85fr;margin-bottom:18px;">
-    <article class="card ai-admin-shell">
-        <div class="card-title-row">
+<section class="stats-grid admin-metric-grid">
+    <article class="metric-card admin-metric-card">
+        <span>Total bugs</span>
+        <strong>{{ total_bugs }}</strong>
+        <span>Recorded in the system</span>
+    </article>
+    <article class="metric-card admin-metric-card">
+        <span>Total users</span>
+        <strong>{{ total_users }}</strong>
+        <span>All accounts</span>
+    </article>
+    <article class="metric-card admin-metric-card">
+        <span>Total fixers</span>
+        <strong>{{ total_fixers }}</strong>
+        <span>Assignable team members</span>
+    </article>
+    <article class="metric-card admin-metric-card admin-metric-alert">
+        <span>Open bugs</span>
+        <strong>{{ open_bugs }}</strong>
+        <span>Still waiting</span>
+    </article>
+</section>
+
+<section class="admin-feature-grid">
+    <article class="card admin-panel-card admin-ai-panel">
+        <div class="card-title-row admin-panel-head">
             <div>
                 <h3 class="card-title">AI control tower</h3>
-                <p class="card-subtitle">Live operational insights for bug triage and workload planning</p>
+                <p class="card-subtitle">Operational insights for triage, workload balance, and delivery focus.</p>
             </div>
+            <div class="admin-panel-kicker">Live</div>
         </div>
-        <div class="ai-grid" style="margin-top:16px;">
+        <div class="admin-insight-grid">
             {% for item in ai_insights.cards %}
-            <div class="ai-card">
+            <div class="admin-insight-card">
                 <span class="ai-label">{{ item.label }}</span>
                 <strong>{{ item.value }}</strong>
-                <div class="meta-copy" style="margin-top:6px;">{{ item.detail }}</div>
+                <div class="meta-copy">{{ item.detail }}</div>
             </div>
             {% endfor %}
         </div>
-        <div class="ai-block" style="margin-top:16px;">
+        <div class="admin-action-panel">
             <h4>Recommended actions</h4>
             <ul class="ai-list">
                 {% for action in ai_insights.actions %}
@@ -43,43 +67,57 @@
         </div>
     </article>
 
-    <article class="card">
-        <div class="card-title-row">
+    <article class="card admin-panel-card admin-signal-panel">
+        <div class="card-title-row admin-panel-head">
             <div>
                 <h3 class="card-title">Delivery signals</h3>
-                <p class="card-subtitle">Quick operational checks</p>
+                <p class="card-subtitle">Fast checks for alerts, workflow gaps, and aging issues.</p>
             </div>
+            <div class="admin-panel-kicker">Ops</div>
         </div>
-        <div class="status-bars" style="margin-top:16px;">
-            <div class="status-row">
+        <div class="admin-signal-stack">
+            <div class="admin-signal-card">
                 <div class="stack-row">
                     <strong>Email system</strong>
                     <span>{% if email_configured %}Configured{% else %}Needs setup{% endif %}</span>
                 </div>
                 <div class="meta-copy">Submission and resolution emails {% if email_configured %}are ready to send{% else %}will send once SMTP is configured{% endif %}.</div>
+                <div class="admin-email-meta">
+                    <div>Sender: {{ smtp_status.sender }}</div>
+                    <div>Server: {{ smtp_status.host }}{% if smtp_status.port != "Not configured" %}:{{ smtp_status.port }}{% endif %}</div>
+                </div>
+                {% if smtp_status.missing %}
+                <div class="admin-missing-list">
+                    {% for item in smtp_status.missing %}
+                    <span class="admin-missing-pill">{{ item }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             {% for bug in ai_insights.oldest_open %}
-            <div class="status-row">
+            <div class="admin-signal-card">
                 <div class="stack-row">
                     <strong>Oldest open bug</strong>
                     <span>#{{ bug["id"] }}</span>
                 </div>
-                <div class="meta-copy">{{ bug["title"] or "Bug report" }} - {{ bug["created_at"] }}</div>
+                <div class="meta-copy">{{ bug["title"] or "Bug report" }}</div>
+                <div class="meta-copy">{{ bug["created_at"] }}</div>
             </div>
             {% endfor %}
         </div>
     </article>
 </section>
 
-<section class="split-grid" style="grid-template-columns:0.95fr 1.05fr;margin-bottom:18px;">
-    <article class="card">
-        <div class="card-title-row">
+<section class="admin-ops-grid">
+    <article class="card admin-panel-card">
+        <div class="card-title-row admin-panel-head">
             <div>
-                <h3 class="card-title">Add fixer account</h3>
-                <p class="card-subtitle">Create a real fixer identity with login access</p>
+                <h3 class="card-title">Create fixer account</h3>
+                <p class="card-subtitle">Add a new fixer with a proper login and temporary password.</p>
             </div>
+            <div class="admin-panel-kicker">Create</div>
         </div>
-        <form method="POST" class="form-grid" style="margin-top:16px;">
+        <form method="POST" class="form-grid admin-form-grid">
             <div class="field">
                 <label>Fixer name / username</label>
                 <input class="input" type="text" name="username" placeholder="Priya" required>
@@ -98,50 +136,81 @@
         </form>
     </article>
 
-    <article class="card">
-        <div class="card-title-row">
+    <article class="card admin-panel-card">
+        <div class="card-title-row admin-panel-head">
             <div>
-                <h3 class="card-title">Fixer onboarding</h3>
-                <p class="card-subtitle">How the fixer flow works in this system</p>
+                <h3 class="card-title">Fixer roster</h3>
+                <p class="card-subtitle">Consistent overview of active fixers, workload, and removal actions.</p>
             </div>
+            <div class="admin-panel-kicker">{{ total_fixers }} total</div>
         </div>
-        <div class="status-bars" style="margin-top:16px;">
-            <div class="status-row">
-                <strong>1. Admin creates fixer</strong>
-                <div class="meta-copy">Each fixer gets a real username, email, and password.</div>
+        <div class="admin-fixer-grid">
+            {% for fixer in fixer_summaries %}
+            <div class="admin-fixer-card">
+                <div class="stack-row">
+                    <strong>{{ fixer.label }}</strong>
+                    <span>{{ fixer.assigned_total }} assigned</span>
+                </div>
+                <div class="meta-copy">{{ fixer.email }}</div>
+                <div class="admin-workload-bars">
+                    <div class="admin-workload-head">
+                        <span>Active workload</span>
+                        <strong>{{ fixer.active_total }}</strong>
+                    </div>
+                    <div class="bar-track admin-workload-track">
+                        <div class="bar-fill admin-workload-fill" style="width: {{ fixer.active_percent }}%;"></div>
+                    </div>
+                    <div class="admin-workload-meta">
+                        <span>Resolved: {{ fixer.resolved_total }}</span>
+                        <span>{{ fixer.latest_status }}</span>
+                    </div>
+                </div>
+                <div class="meta-copy">{{ fixer.latest_title }}</div>
+                <form method="POST" action="{{ url_for('delete_fixer', username=fixer.username) }}">
+                    <button class="btn btn-danger btn-small" type="submit">Remove fixer</button>
+                </form>
             </div>
-            <div class="status-row">
-                <strong>2. Fixer logs in</strong>
-                <div class="meta-copy">The login page shows real fixer quick-login cards for easier access during demos and testing.</div>
-            </div>
-            <div class="status-row">
-                <strong>3. Fixer updates profile</strong>
-                <div class="meta-copy">Each fixer can open Profile and set a new password after login.</div>
-            </div>
+            {% endfor %}
         </div>
     </article>
 </section>
 
-<section class="split-grid" style="grid-template-columns:1.2fr 0.8fr;">
-    <article class="list-card">
-        <div class="card-title-row">
+<section class="admin-data-grid">
+    <article class="list-card admin-panel-card">
+        <div class="card-title-row admin-panel-head">
             <div>
                 <h3 class="card-title">Recent bugs</h3>
-                <p class="card-subtitle">Latest items across the full workspace</p>
+                <p class="card-subtitle">Latest bug reports across the workspace.</p>
             </div>
+            <div class="admin-panel-kicker">Queue</div>
         </div>
-        <div class="table-list">
+        <div class="table-list admin-table-list">
             {% for bug in bugs[:8] %}
-            <div class="table-row">
+            <div class="table-row admin-table-row">
                 <div><strong>#{{ bug["id"] }}</strong></div>
-                <div>
+                <div class="admin-bug-cell">
                     <strong>{{ bug["title"] }}</strong>
                     <div class="meta-copy">{{ bug["app_name"] or "General" }}</div>
                 </div>
-                <div><strong>{{ display_name(bug["assigned_to"]) }}</strong><div class="meta-copy">Fixer</div></div>
+                <div class="admin-owner-cell">
+                    <strong>{{ display_name(bug["assigned_to"]) }}</strong>
+                    <div class="meta-copy">Fixer</div>
+                </div>
                 <div><span class="badge badge-{{ bug['priority']|lower }}">{{ bug["priority"] }}</span></div>
-                <div><span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span></div>
-                <div><a class="btn" href="{{ url_for('edit_bug', id=bug['id']) }}">Open</a></div>
+                <div>
+                    <span class="badge badge-{{ bug['status']|lower|replace(' ', '-') }}">{{ bug["status"] }}</span>
+                    <form method="POST" action="{{ url_for('reassign_bug', id=bug['id']) }}" class="quick-status-form admin-reassign-form">
+                        <select class="quick-status-select" name="assigned_to" onchange="this.form.submit()">
+                            {% for fixer in fixers %}
+                            <option value="{{ fixer['username'] }}" {% if bug["assigned_to"] == fixer["username"] %}selected{% endif %}>{{ display_name(fixer["username"]) }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                <div class="inline-actions admin-actions">
+                    <a class="btn" href="{{ url_for('edit_bug', id=bug['id']) }}">Manage</a>
+                    <a class="btn btn-ghost" href="{{ url_for('bug_detail', id=bug['id']) }}">View</a>
+                </div>
             </div>
             {% else %}
             <div class="empty-state">No bugs yet.</div>
@@ -149,22 +218,22 @@
         </div>
     </article>
 
-    <article class="list-card">
-        <div class="card-title-row">
+    <article class="list-card admin-panel-card">
+        <div class="card-title-row admin-panel-head">
             <div>
                 <h3 class="card-title">User directory</h3>
-                <p class="card-subtitle">Account roster and roles</p>
+                <p class="card-subtitle">Structured account roster with roles and email visibility.</p>
             </div>
+            <div class="admin-panel-kicker">Users</div>
         </div>
-        <div class="table-list">
+        <div class="table-list admin-user-list">
             {% for user in users %}
-            <div class="table-row compact">
+            <div class="admin-user-row">
                 <div>
                     <strong>{{ display_name(user["username"]) }}</strong>
                     <div class="meta-copy">{{ user["email"] or "No email" }}</div>
                 </div>
                 <div><span class="badge badge-{{ user['role']|lower }}">{{ user["role"]|title }}</span></div>
-                <div class="meta-copy">Account active</div>
             </div>
             {% endfor %}
         </div>

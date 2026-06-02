@@ -1,8 +1,12 @@
+import os
+import tempfile
 import sqlite3
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
-DB_NAME = "bugs.db"
+# Use an environment-configured database path when available, otherwise
+# fall back to a writable temp directory (serverless environments are read-only).
+DB_NAME = os.environ.get("BUG_TRACKER_DB") or os.path.join(tempfile.gettempdir(), "bugs.db")
 
 
 def is_password_hash(value):

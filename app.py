@@ -10,6 +10,7 @@ import re
 from urllib import request as urllib_request
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from database import *
+import tempfile
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -21,7 +22,7 @@ app.config["SMTP_PASSWORD"] = os.environ.get("BUG_TRACKER_SMTP_PASSWORD", "")
 app.config["SMTP_SENDER_EMAIL"] = os.environ.get("BUG_TRACKER_SENDER_EMAIL", "")
 app.config["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY", "")
 app.config["OPENAI_MODEL"] = os.environ.get("BUG_TRACKER_AI_MODEL", "gpt-4.1-mini")
-app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
+app.config["UPLOAD_FOLDER"] = os.environ.get("BUG_TRACKER_UPLOAD_FOLDER") or os.path.join(tempfile.gettempdir(), "uploads")
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = {"png", "jpg", "jpeg", "gif", "webp"}
 
 DISPLAY_NAME_MAP = {
@@ -57,7 +58,11 @@ try:
     create_tables()
 except Exception as e:
     print("Database setup skipped:", e)
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+try:
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+except Exception:
+    # In read-only environments this may fail; fallback to system temp dir
+    app.config["UPLOAD_FOLDER"] = os.environ.get("BUG_TRACKER_UPLOAD_FOLDER") or tempfile.gettempdir()
 
 
 def is_logged_in():
